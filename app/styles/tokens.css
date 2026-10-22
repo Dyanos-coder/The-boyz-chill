@@ -1,0 +1,147 @@
+/* ==========================================================================
+   The Boyz — tokens de design
+   Source unique des couleurs, typos, espacements et formes.
+   Le site l'importe tel quel (voir TECHNOLOGIES.md, « De la charte au code »).
+   Thème : clair par défaut, sombre via prefers-color-scheme ou data-theme.
+   ========================================================================== */
+
+:root {
+  /* Couleurs : base (clair) */
+  --bz-paper: #F3F4FA;        /* fond de page */
+  --bz-surface: #FFFFFF;      /* cartes, champs */
+  --bz-surface-2: #E8EAF6;    /* zones en retrait, pistes, segmentés */
+  --bz-ink: #14163A;          /* texte principal */
+  --bz-ink-soft: #5A5E86;     /* texte secondaire */
+  --bz-line: #D5D8EB;         /* bordures, séparateurs */
+
+  /* Couleurs : marque */
+  --bz-primary: #2C3BEB;      /* Cobalt : actions, liens, souches de ticket */
+  --bz-primary-hover: #2130CF;
+  --bz-on-primary: #FFFFFF;
+  --bz-accent: #FF7A2F;       /* Mandarine : « ce soir », bouton créer, le z du logo */
+  --bz-accent-hover: #F06A1D;
+  --bz-on-accent: #14163A;
+
+  /* Couleurs : réponses à un plan */
+  --bz-ok: #0F8A60;    --bz-on-ok: #FFFFFF;      /* chaud */
+  --bz-maybe: #E2A200; --bz-on-maybe: #14163A;   /* peut-être */
+  --bz-no: #D23B57;    --bz-on-no: #FFFFFF;      /* pas dispo */
+
+  /* Couleurs : vibes (catégories de plan) */
+  --bz-vibe-chill: #7A6CF0;
+  --bz-vibe-soiree: #C83A8E;
+  --bz-vibe-bouffe: #EE6A1E;
+  --bz-vibe-sport: #0F8A60;
+  --bz-vibe-gaming: #1592A8;
+  --bz-vibe-sortie: #B07A00;
+
+  --bz-focus: #FF7A2F;
+  --bz-shadow-1: 0 1px 2px rgb(20 22 58 / .06), 0 2px 8px rgb(20 22 58 / .06);
+  --bz-shadow-2: 0 4px 12px rgb(20 22 58 / .10), 0 18px 36px rgb(20 22 58 / .10);
+  --bz-drop: 0 8px 18px rgb(20 22 58 / .10);   /* pour filter: drop-shadow() des tickets */
+
+  /* Typographie */
+  --bz-font-display: "Unbounded", "Arial Black", "Segoe UI", sans-serif;
+  --bz-font-body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --bz-font-mono: "Martian Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --bz-fs-2xs: .6875rem;   /* 11px : étiquettes mono */
+  --bz-fs-xs: .75rem;      /* 12px */
+  --bz-fs-sm: .875rem;     /* 14px */
+  --bz-fs-base: 1rem;      /* 16px : texte courant */
+  --bz-fs-lg: 1.125rem;    /* 18px */
+  --bz-fs-xl: 1.375rem;    /* 22px : titre de plan */
+  --bz-fs-2xl: 1.75rem;    /* 28px : titre de section */
+  --bz-fs-3xl: 2.25rem;    /* 36px : titre de page */
+  --bz-fs-4xl: 3.25rem;    /* 52px : display */
+
+  /* Espacements : base 4px */
+  --bz-sp-1: .25rem;   /* 4 */
+  --bz-sp-2: .5rem;    /* 8 */
+  --bz-sp-3: .75rem;   /* 12 */
+  --bz-sp-4: 1rem;     /* 16 */
+  --bz-sp-5: 1.5rem;   /* 24 */
+  --bz-sp-6: 2rem;     /* 32 */
+  --bz-sp-7: 3rem;     /* 48 */
+  --bz-sp-8: 4rem;     /* 64 */
+
+  /* Formes */
+  --bz-r-sm: 8px;
+  --bz-r-md: 14px;
+  --bz-r-lg: 22px;
+  --bz-r-pill: 999px;
+
+  --bz-ease: cubic-bezier(.2, .8, .2, 1);
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bz-paper: #0C0E22;
+    --bz-surface: #15183A;
+    --bz-surface-2: #1E2250;
+    --bz-ink: #EDEFFF;
+    --bz-ink-soft: #A2A7D4;
+    --bz-line: #2B3068;
+
+    --bz-primary: #7F8AFF;
+    --bz-primary-hover: #9AA3FF;
+    --bz-on-primary: #0C0E22;
+    --bz-accent: #FF8E4F;
+    --bz-accent-hover: #FFA36E;
+    --bz-on-accent: #0C0E22;
+
+    --bz-ok: #3CCB97;    --bz-on-ok: #0C0E22;
+    --bz-maybe: #F2B630; --bz-on-maybe: #0C0E22;
+    --bz-no: #FF6B86;    --bz-on-no: #0C0E22;
+
+    --bz-vibe-chill: #A499FF;
+    --bz-vibe-soiree: #F06AB8;
+    --bz-vibe-bouffe: #FF9150;
+    --bz-vibe-sport: #3CCB97;
+    --bz-vibe-gaming: #3FC3DB;
+    --bz-vibe-sortie: #E0AE3A;
+
+    --bz-focus: #FF8E4F;
+    --bz-shadow-1: 0 1px 2px rgb(0 0 0 / .3), 0 2px 8px rgb(0 0 0 / .25);
+    --bz-shadow-2: 0 4px 12px rgb(0 0 0 / .35), 0 18px 36px rgb(0 0 0 / .35);
+    --bz-drop: 0 8px 18px rgb(0 0 0 / .35);
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bz-paper: #0C0E22;
+  --bz-surface: #15183A;
+  --bz-surface-2: #1E2250;
+  --bz-ink: #EDEFFF;
+  --bz-ink-soft: #A2A7D4;
+  --bz-line: #2B3068;
+
+  --bz-primary: #7F8AFF;
+  --bz-primary-hover: #9AA3FF;
+  --bz-on-primary: #0C0E22;
+  --bz-accent: #FF8E4F;
+  --bz-accent-hover: #FFA36E;
+  --bz-on-accent: #0C0E22;
+
+  --bz-ok: #3CCB97;    --bz-on-ok: #0C0E22;
+  --bz-maybe: #F2B630; --bz-on-maybe: #0C0E22;
+  --bz-no: #FF6B86;    --bz-on-no: #0C0E22;
+
+  --bz-vibe-chill: #A499FF;
+  --bz-vibe-soiree: #F06AB8;
+  --bz-vibe-bouffe: #FF9150;
+  --bz-vibe-sport: #3CCB97;
+  --bz-vibe-gaming: #3FC3DB;
+  --bz-vibe-sortie: #E0AE3A;
+
+  --bz-focus: #FF8E4F;
+  --bz-shadow-1: 0 1px 2px rgb(0 0 0 / .3), 0 2px 8px rgb(0 0 0 / .25);
+  --bz-shadow-2: 0 4px 12px rgb(0 0 0 / .35), 0 18px 36px rgb(0 0 0 / .35);
+  --bz-drop: 0 8px 18px rgb(0 0 0 / .35);
+
+  color-scheme: dark;
+}

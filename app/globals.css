@@ -1,26 +1,164 @@
 @import "tailwindcss";
+@import "./styles/tokens.css";
+@import "./styles/components.css";
 
+/* Les polices sont chargées par next/font (voir layout.tsx), qui expose des
+   variables à noms hachés : on les branche sur les tokens de la charte. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bz-font-display: var(--font-unbounded), "Arial Black", "Segoe UI", sans-serif;
+  --bz-font-body: var(--font-figtree), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --bz-font-mono: var(--font-martian), ui-monospace, "Cascadia Mono", Consolas, monospace;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-paper: var(--bz-paper);
+  --color-surface: var(--bz-surface);
+  --color-surface-2: var(--bz-surface-2);
+  --color-ink: var(--bz-ink);
+  --color-ink-soft: var(--bz-ink-soft);
+  --color-line: var(--bz-line);
+  --color-primary: var(--bz-primary);
+  --color-on-primary: var(--bz-on-primary);
+  --color-accent: var(--bz-accent);
+  --color-on-accent: var(--bz-on-accent);
+  --color-ok: var(--bz-ok);
+  --color-maybe: var(--bz-maybe);
+  --color-no: var(--bz-no);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-display: var(--bz-font-display);
+  --font-sans: var(--bz-font-body);
+  --font-mono: var(--bz-font-mono);
+
+  --radius-sm: var(--bz-r-sm);
+  --radius-md: var(--bz-r-md);
+  --radius-lg: var(--bz-r-lg);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--bz-paper);
+  color: var(--bz-ink);
+  font: 400 var(--bz-fs-base)/1.55 var(--bz-font-body);
+  -webkit-font-smoothing: antialiased;
 }
+
+h1, h2, h3 { text-wrap: balance; }
+
+/* ---------- Mise en page de l'app ---------- */
+.shell {
+  width: 100%;
+  max-width: 640px;
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+.page { display: grid; gap: 20px; padding-block: 8px 120px; }
+
+.page-title {
+  margin: 0;
+  font: 700 var(--bz-fs-2xl)/1.1 var(--bz-font-display);
+  letter-spacing: -.03em;
+}
+
+.section-label {
+  font: 500 var(--bz-fs-2xs)/1 var(--bz-font-mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--bz-ink-soft);
+}
+
+.card {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  background: var(--bz-surface);
+  border: 1px solid var(--bz-line);
+  border-radius: var(--bz-r-lg);
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--bz-paper) 88%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.app-tabbar {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 20;
+}
+.app-tabbar .tabbar {
+  max-width: 640px;
+  margin-inline: auto;
+  padding-left: max(6px, env(safe-area-inset-left, 0px));
+  padding-right: max(6px, env(safe-area-inset-right, 0px));
+}
+@media (min-width: 640px) {
+  .app-tabbar .tabbar { border-inline: 1px solid var(--bz-line); border-radius: 22px 22px 0 0; }
+}
+
+.form-error {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--bz-r-md);
+  background: color-mix(in srgb, var(--bz-no) 12%, var(--bz-surface));
+  color: color-mix(in srgb, var(--bz-no) 75%, var(--bz-ink));
+  font-size: var(--bz-fs-sm);
+}
+
+.form-ok {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--bz-r-md);
+  background: color-mix(in srgb, var(--bz-ok) 12%, var(--bz-surface));
+  color: color-mix(in srgb, var(--bz-ok) 75%, var(--bz-ink));
+  font-size: var(--bz-fs-sm);
+}
+
+.people-group { display: grid; gap: 10px; }
+.people-group__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.people-list { display: flex; flex-wrap: wrap; gap: 10px 14px; margin: 0; padding: 0; list-style: none; }
+.person { display: inline-flex; align-items: center; gap: 8px; font-size: var(--bz-fs-sm); font-weight: 600; }
+
+.link-plain { color: inherit; text-decoration: none; }
+
+/* Sélecteur à segments neutre (thème) */
+.rsvp [data-v="theme"][aria-pressed="true"] {
+  background: var(--bz-surface);
+  color: var(--bz-ink);
+  box-shadow: var(--bz-shadow-1);
+}
+
+/* Ticket d'entrée (connexion, invitation) */
+.auth-ticket-wrap { filter: drop-shadow(var(--bz-drop)); }
+.auth-ticket {
+  --stub: 64px;
+  --notch: 13px;
+  --notch-x: calc(100% - var(--stub));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--stub);
+  background: var(--bz-surface);
+  border-radius: 28px;
+  overflow: hidden;
+}
+.auth-ticket__main { display: grid; gap: 20px; padding: 28px 24px; min-width: 0; }
+.auth-ticket__lede { margin: 0; color: var(--bz-ink-soft); }
+.auth-ticket__stub {
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bz-primary);
+  color: var(--bz-on-primary);
+  border-left: 2px dashed color-mix(in srgb, var(--bz-on-primary) 35%, transparent);
+}
+.auth-ticket__stub span {
+  writing-mode: vertical-rl;
+  font: 500 var(--bz-fs-2xs)/1 var(--bz-font-mono);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sub { margin: 0; font: 700 var(--bz-fs-base)/1.2 var(--bz-font-body); }
+code { font: 400 .85em var(--bz-font-mono); background: var(--bz-surface-2); padding: 2px 6px; border-radius: 6px; }

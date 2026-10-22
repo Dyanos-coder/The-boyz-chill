@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
 
+// cacheComponents est désactivé : tout le site est derrière une connexion,
+// chaque page dépend de l'utilisateur et change en temps réel.
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
   turbopack: {
     rules: {
       "*.css": {

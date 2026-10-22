@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Boyz
 
-## Getting Started
+Le site des plans du groupe : on lance un plan, chacun dit s'il est chaud, tout le monde voit qui vient en direct.
 
-First, run the development server:
+Stack et base de données : voir [../TECHNOLOGIES.md](../TECHNOLOGIES.md). Charte graphique : [../charte-graphique/](../charte-graphique/).
+
+## Ce qui marche aujourd'hui (MVP)
+
+- Connexion par e-mail, sans mot de passe (lien ou code à 6 chiffres).
+- Profil : pseudo et couleur d'avatar.
+- Création du groupe, lien d'invitation, page « Le groupe ».
+- Lancer un plan (vibe, date ou « à décider », lieu, adresse, infos, places), le modifier, l'annuler, le supprimer.
+- Répondre chaud / peut-être / pas dispo, avec une limite de places.
+- Accueil (plan du jour, plus tard, idées sans date), agenda par mois, page d'un plan avec les réponses en temps réel.
+- Thème clair / sombre / auto.
+
+## Mise en route
+
+### 1. Créer le projet Supabase (une fois)
+
+1. Crée un compte sur [supabase.com](https://supabase.com) puis un projet, région **Europe** (Paris ou Francfort).
+2. Dans **SQL Editor**, colle tout le contenu de [supabase/migrations/0001_init.sql](supabase/migrations/0001_init.sql) et lance-le.
+3. Dans **Authentication > URL Configuration** :
+   - Site URL : `http://localhost:3000` (à remplacer par l'adresse Vercel une fois en ligne).
+   - Redirect URLs : ajoute `http://localhost:3000/**` (et plus tard `https://ton-site.vercel.app/**`).
+4. Dans **Authentication > Email Templates**, modifie **Magic Link** et **Confirm signup** (envoyé à la toute première connexion) pour y ajouter le code. Comme ça on peut se connecter même si le lien s'ouvre dans un autre navigateur que le site :
+
+   ```html
+   <h2>Connexion à The Boyz</h2>
+   <p><a href="{{ .ConfirmationURL }}">Me connecter</a></p>
+   <p>Ou tape ce code sur le site : <strong>{{ .Token }}</strong></p>
+   ```
+
+5. Dans **Project Settings > API Keys**, copie l'URL du projet et la clé *publishable*.
+
+> L'e-mail intégré de Supabase est limité à quelques envois par heure. Pour un groupe de potes ça passe ; sinon, branche un SMTP (Resend, Brevo…) dans **Authentication > SMTP Settings**.
+
+### 2. Lancer le site en local
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+cp .env.example .env.local   # puis remplis les deux valeurs
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvre [http://localhost:3000](http://localhost:3000). Le premier qui se connecte crée le groupe « The Boyz » et partage le lien d'invitation depuis l'onglet **Le groupe**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Mettre en ligne (Vercel)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Pousse le dépôt sur GitHub, importe-le sur [vercel.com](https://vercel.com).
+2. Ajoute les deux variables `NEXT_PUBLIC_SUPABASE_*` dans les réglages du projet Vercel.
+3. Dans Supabase, mets l'adresse Vercel en Site URL et dans les Redirect URLs.
 
-## Learn More
+## Organisation du code
 
-To learn more about Next.js, take a look at the following resources:
+```text
+app/
+  (app)/            pages de l'app (connecté + membre du groupe) : accueil, agenda, groupe, moi, plans
+  actions/          server actions : auth, profil, groupe, plans
+  auth/callback/    arrivée depuis le lien de l'e-mail
+  connexion/, bienvenue/, rejoindre/   parcours d'entrée
+  styles/           tokens.css et components.css, copiés de la charte
+components/         composants de la charte en React (ticket, liste, réponses, avatars…)
+lib/
+  data.ts           lectures en base + gardes d'accès (requireMember…)
+  format.ts         dates à l'heure de Paris, euros
+  supabase/         clients serveur et navigateur
+proxy.ts            rafraîchit la session, renvoie vers /connexion si besoin
+supabase/migrations/ schéma SQL
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Toutes les règles d'accès sont dans la base (Row Level Security) : même en contournant l'interface, on ne voit que les plans de son groupe.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Commandes
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Commande | Effet |
+| --- | --- |
+| `pnpm dev` | serveur de dev |
+| `pnpm build` | build de production |
+| `pnpm lint` | ESLint |
