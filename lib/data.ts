@@ -9,7 +9,7 @@ const PROFILE_FIELDS = "id, pseudo, color, avatar_url";
 
 const PLAN_SELECT = `
   id, group_id, created_by, title, description, vibe, status, starts_at, ends_at,
-  place_name, place_address, max_people, created_at,
+  place_name, place_address, max_people, link_url, cover_path, created_at,
   creator:profiles!plans_created_by_fkey(${PROFILE_FIELDS}),
   rsvps:plan_rsvps(user_id, status, profile:profiles(${PROFILE_FIELDS}))
 `;
@@ -58,6 +58,20 @@ export const requireMember = cache(async () => {
   return { ...session, profile: profile as Profile & { pseudo: string }, group };
 });
 
+type Supabase = Awaited<ReturnType<typeof createClient>>;
+
+/** Ajoute à chaque plan une URL signée pour son image (bucket privé). */
+async function withCovers(supabase: Supabase, rows: unknown[] | null): Promise<Plan[]> {
+  const plans = (rows ?? []) as Plan[];
+  const paths = plans.map((p) => p.cover_path).filter((p): p is string => Boolean(p));
+  const urls = new Map<string, string>();
+  if (paths.length) {
+    const { data } = await supabase.storage.from("plan-photos").createSignedUrls(paths, 3600);
+    data?.forEach((d) => d.path && d.signedUrl && urls.set(d.path, d.signedUrl));
+  }
+  return plans.map((p) => ({ ...p, cover_url: p.cover_path ? (urls.get(p.cover_path) ?? null) : null }));
+}
+
 const startOfTodayIso = () => parisToIso(dayKey(new Date()), "00:00");
 
 /** Plans à venir (dont ceux du jour) et idées sans date, hors annulés. */
@@ -72,7 +86,7 @@ export async function getUpcomingPlans(groupId: string): Promise<Plan[]> {
     .order("starts_at", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return (data ?? []) as unknown as Plan[];
+  return withCovers(supabase, data);
 }
 
 /** Plans passés ou annulés, du plus récent au plus ancien. */
@@ -86,14 +100,16 @@ export async function getPastPlans(groupId: string, limit = 30): Promise<Plan[]>
     .order("starts_at", { ascending: false })
     .limit(limit);
   if (error) throw error;
-  return (data ?? []) as unknown as Plan[];
+  return withCovers(supabase, data);
 }
 
 export async function getPlan(id: string): Promise<Plan | null> {
   const { supabase } = await requireUser();
   const { data, error } = await supabase.from("plans").select(PLAN_SELECT).eq("id", id).maybeSingle();
   if (error && error.code !== "22P02") throw error; // 22P02 : id qui n'est pas un uuid
-  return (data as unknown as Plan) ?? null;
+  if (!data) return null;
+  const [plan] = await withCovers(supabase, [data]);
+  return plan;
 }
 
 export type Member = Pick<Profile, "id" | "pseudo" | "color" | "avatar_url"> & {

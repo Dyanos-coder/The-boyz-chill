@@ -16,10 +16,10 @@ export default async function ConnexionPage({ searchParams }: PageProps<"/connex
         <div className="auth-ticket notched">
           <div className="auth-ticket__main">
             <Logo size="clamp(2.75rem, 14vw, 4rem)" />
-            <p className="auth-ticket__lede">Les plans des boyz, au même endroit. Connecte-toi avec ton e-mail, sans mot de passe.</p>
+            <p className="auth-ticket__lede">Les plans des boyz, au même endroit.</p>
             {linkError && (
               <p className="form-error" role="alert">
-                Ce lien a expiré ou a déjà servi. Redemande un e-mail, ou tape le code reçu.
+                Ce lien a expiré ou a déjà servi. Connecte-toi, ou redemande un lien avec « Mot de passe oublié ».
               </p>
             )}
             <LoginForm suite={suite} />

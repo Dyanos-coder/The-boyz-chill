@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, MapPin } from "lucide-react";
+import { ChevronLeft, ExternalLink, MapPin } from "lucide-react";
 import { getMembers, getPlan, requireMember } from "@/lib/data";
 import { formatLongDate, formatTime } from "@/lib/format";
 import { RSVP_LABELS, type Profile, type RsvpStatus } from "@/lib/types";
@@ -57,71 +57,92 @@ export default async function PlanPage({ params, searchParams }: PageProps<"/pla
         </p>
       )}
 
-      <PlanTicket plan={plan} userId={userId} linked={false} />
-
-      <section className="card">
-        <span className="section-label">Les infos</span>
-        <dl style={{ display: "grid", gap: 12, margin: 0 }}>
-          <div>
-            <dt className="field__label">Quand</dt>
-            <dd style={{ margin: 0, color: "var(--bz-ink-soft)" }}>
-              {plan.starts_at ? `${capitalize(formatLongDate(plan.starts_at))} à ${formatTime(plan.starts_at)}` : "Date à décider"}
-            </dd>
-          </div>
-          {(plan.place_name || plan.place_address) && (
-            <div>
-              <dt className="field__label">Où</dt>
-              <dd style={{ margin: 0, color: "var(--bz-ink-soft)" }}>
-                {[plan.place_name, plan.place_address].filter(Boolean).join(" · ")}
-              </dd>
-            </div>
+      <div className="plan-layout">
+        <div className="plan-layout__main">
+          {plan.cover_url && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="plan-cover" src={plan.cover_url} alt={`Image du plan ${plan.title}`} />
           )}
-          {plan.description && (
-            <div>
-              <dt className="field__label">À savoir</dt>
-              <dd style={{ margin: 0, color: "var(--bz-ink-soft)", whiteSpace: "pre-line" }}>{plan.description}</dd>
-            </div>
-          )}
-          <div>
-            <dt className="field__label">Lancé par</dt>
-            <dd style={{ margin: 0, color: "var(--bz-ink-soft)" }}>{plan.creator?.pseudo ?? "un ancien membre"}</dd>
-          </div>
-        </dl>
-        {mapsUrl && (
-          <a className="btn btn--outline" href={mapsUrl} target="_blank" rel="noreferrer" style={{ justifySelf: "start" }}>
-            <MapPin className="i" aria-hidden="true" />
-            Ouvrir l&apos;itinéraire
-          </a>
-        )}
-      </section>
 
-      <section className="card">
-        <span className="section-label">
-          Qui vient · {chauds.length}
-          {plan.max_people ? `/${plan.max_people}` : ""} chaud{chauds.length > 1 ? "s" : ""}
-        </span>
-        {groups
-          .filter((g) => g.people.length > 0)
-          .map((g) => (
-            <div key={g.key} className="people-group">
-              <div className="people-group__head">
-                <span className="field__label">{g.label}</span>
-                <span className="poll__count">{g.people.length}</span>
+          <PlanTicket plan={plan} userId={userId} linked={false} showCover={false} />
+
+          <section className="card">
+            <span className="section-label">Les infos</span>
+            <dl style={{ display: "grid", gap: 12, margin: 0 }}>
+              <div>
+                <dt className="field__label">Quand</dt>
+                <dd style={{ margin: 0, color: "var(--bz-ink-soft)" }}>
+                  {plan.starts_at ? `${capitalize(formatLongDate(plan.starts_at))} à ${formatTime(plan.starts_at)}` : "Date à décider"}
+                </dd>
               </div>
-              <ul className="people-list">
-                {g.people.map((p) => (
-                  <li key={p.id} className="person">
-                    <Avatar profile={p} size="sm" rsvp={g.key === "silence" ? undefined : g.key} />
-                    {p.pseudo}
-                    {p.id === userId && <span style={{ color: "var(--bz-ink-soft)", fontWeight: 400 }}>(toi)</span>}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-      </section>
+              {(plan.place_name || plan.place_address) && (
+                <div>
+                  <dt className="field__label">Où</dt>
+                  <dd style={{ margin: 0, color: "var(--bz-ink-soft)" }}>
+                    {[plan.place_name, plan.place_address].filter(Boolean).join(" · ")}
+                  </dd>
+                </div>
+              )}
+              {plan.description && (
+                <div>
+                  <dt className="field__label">À savoir</dt>
+                  <dd style={{ margin: 0, color: "var(--bz-ink-soft)", whiteSpace: "pre-line" }}>{plan.description}</dd>
+                </div>
+              )}
+              <div>
+                <dt className="field__label">Lancé par</dt>
+                <dd style={{ margin: 0, color: "var(--bz-ink-soft)" }}>{plan.creator?.pseudo ?? "un ancien membre"}</dd>
+              </div>
+            </dl>
+            {(mapsUrl || plan.link_url) && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                {plan.link_url && (
+                  <a className="btn btn--primary" href={plan.link_url} target="_blank" rel="noreferrer">
+                    <ExternalLink className="i" aria-hidden="true" />
+                    Voir l&apos;événement
+                  </a>
+                )}
+                {mapsUrl && (
+                  <a className="btn btn--outline" href={mapsUrl} target="_blank" rel="noreferrer">
+                    <MapPin className="i" aria-hidden="true" />
+                    Ouvrir l&apos;itinéraire
+                  </a>
+                )}
+              </div>
+            )}
+          </section>
+        </div>
 
-      {canManage && <PlanOwnerActions planId={plan.id} cancelled={plan.status === "annule"} />}
+        <div className="plan-layout__side">
+          <section className="card">
+            <span className="section-label">
+              Qui vient · {chauds.length}
+              {plan.max_people ? `/${plan.max_people}` : ""} chaud{chauds.length > 1 ? "s" : ""}
+            </span>
+            {groups
+              .filter((g) => g.people.length > 0)
+              .map((g) => (
+                <div key={g.key} className="people-group">
+                  <div className="people-group__head">
+                    <span className="field__label">{g.label}</span>
+                    <span className="poll__count">{g.people.length}</span>
+                  </div>
+                  <ul className="people-list">
+                    {g.people.map((p) => (
+                      <li key={p.id} className="person">
+                        <Avatar profile={p} size="sm" rsvp={g.key === "silence" ? undefined : g.key} />
+                        {p.pseudo}
+                        {p.id === userId && <span style={{ color: "var(--bz-ink-soft)", fontWeight: 400 }}>(toi)</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+          </section>
+
+          {canManage && <PlanOwnerActions planId={plan.id} cancelled={plan.status === "annule"} />}
+        </div>
+      </div>
     </>
   );
 }

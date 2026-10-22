@@ -7,7 +7,7 @@ import { ProfileForm } from "@/components/profile-form";
 export const metadata: Metadata = { title: "Bienvenue" };
 
 export default async function BienvenuePage() {
-  await requireUser();
+  const { userId } = await requireUser();
   const profile = await getMyProfile();
   if (profile?.pseudo) redirect("/");
 
@@ -15,9 +15,16 @@ export default async function BienvenuePage() {
     <main className="shell page" style={{ paddingTop: 32, maxWidth: 520 }}>
       <Logo size="1.5rem" />
       <h1 className="page-title">Bienvenue chez les boyz</h1>
-      <p style={{ margin: 0, color: "var(--bz-ink-soft)" }}>Choisis ton pseudo et ta couleur. Tu pourras les changer plus tard.</p>
+      <p style={{ margin: 0, color: "var(--bz-ink-soft)" }}>Choisis ton pseudo, ta photo et ta couleur. Tu pourras les changer plus tard.</p>
       <div className="card">
-        <ProfileForm pseudo="" color={profile?.color ?? "chill"} suite="/" submitLabel="C'est parti" />
+        <ProfileForm
+          userId={userId}
+          pseudo=""
+          color={profile?.color ?? "chill"}
+          avatarUrl={profile?.avatar_url ?? null}
+          suite="/"
+          submitLabel="C'est parti"
+        />
       </div>
     </main>
   );

@@ -39,7 +39,12 @@ export function Avatar({
       data-rsvp={rsvp}
       title={profile.pseudo ?? undefined}
     >
-      {initial}
+      {profile.avatar_url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={profile.avatar_url} alt="" loading="lazy" />
+      ) : (
+        initial
+      )}
     </span>
   );
 }

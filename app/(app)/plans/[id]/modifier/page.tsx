@@ -16,10 +16,12 @@ export default async function ModifierPlanPage({ params }: PageProps<"/plans/[id
   const when = plan.starts_at ? isoToParis(plan.starts_at) : { date: "", time: "20:00" };
 
   return (
-    <>
+    <div className="narrow">
       <h1 className="page-title">Modifier le plan</h1>
       <PlanForm
         submitLabel="Enregistrer"
+        groupId={group.id}
+        coverUrl={plan.cover_url}
         initial={{
           id: plan.id,
           title: plan.title,
@@ -31,8 +33,10 @@ export default async function ModifierPlanPage({ params }: PageProps<"/plans/[id
           place_address: plan.place_address ?? "",
           description: plan.description ?? "",
           max_people: plan.max_people ? String(plan.max_people) : "",
+          link_url: plan.link_url ?? "",
+          cover_path: plan.cover_path ?? "",
         }}
       />
-    </>
+    </div>
   );
 }

@@ -65,6 +65,10 @@ export type Plan = {
   place_name: string | null;
   place_address: string | null;
   max_people: number | null;
+  link_url: string | null;
+  cover_path: string | null;
+  /** URL signée (1 h) de l'image de couverture, calculée côté serveur. */
+  cover_url: string | null;
   created_at: string;
   creator: Pick<Profile, "id" | "pseudo" | "color" | "avatar_url"> | null;
   rsvps: Rsvp[];

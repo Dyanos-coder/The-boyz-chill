@@ -194,7 +194,8 @@ textarea.input { min-height: 104px; padding-block: 12px; resize: vertical; }
 
 /* ---------- Réponse à un plan (chaud / peut-être / pas dispo) ---------- */
 .rsvp {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
+  /* Une colonne égale par bouton, quel que soit leur nombre. */
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px;
   padding: 4px;
   background: var(--bz-surface-2);
   border-radius: var(--bz-r-pill);

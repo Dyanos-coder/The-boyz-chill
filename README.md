@@ -6,8 +6,8 @@ Stack et base de données : voir [../TECHNOLOGIES.md](../TECHNOLOGIES.md). Chart
 
 ## Ce qui marche aujourd'hui (MVP)
 
-- Connexion par e-mail, sans mot de passe (lien ou code à 6 chiffres).
-- Profil : pseudo et couleur d'avatar.
+- Inscription et connexion par e-mail et mot de passe, mot de passe oublié.
+- Profil : pseudo, photo et couleur d'avatar.
 - Création du groupe, lien d'invitation, page « Le groupe ».
 - Lancer un plan (vibe, date ou « à décider », lieu, adresse, infos, places), le modifier, l'annuler, le supprimer.
 - Répondre chaud / peut-être / pas dispo, avec une limite de places.
@@ -19,18 +19,16 @@ Stack et base de données : voir [../TECHNOLOGIES.md](../TECHNOLOGIES.md). Chart
 ### 1. Créer le projet Supabase (une fois)
 
 1. Crée un compte sur [supabase.com](https://supabase.com) puis un projet, région **Europe** (Paris ou Francfort).
-2. Dans **SQL Editor**, colle tout le contenu de [supabase/migrations/0001_init.sql](supabase/migrations/0001_init.sql) et lance-le.
+2. Dans **SQL Editor**, colle et lance [supabase/migrations/0001_init.sql](supabase/migrations/0001_init.sql), puis [0002_lien_image.sql](supabase/migrations/0002_lien_image.sql).
 3. Dans **Authentication > URL Configuration** :
    - Site URL : `http://localhost:3000` (à remplacer par l'adresse Vercel une fois en ligne).
    - Redirect URLs : ajoute `http://localhost:3000/**` (et plus tard `https://ton-site.vercel.app/**`).
-4. Dans **Authentication > Email Templates**, modifie **Magic Link** et **Confirm signup** (envoyé à la toute première connexion) pour y ajouter le code. Comme ça on peut se connecter même si le lien s'ouvre dans un autre navigateur que le site :
+4. Dans **Authentication > Sign In / Providers > Email** : laisse « Email » activé. « Confirm email » activé = chaque nouveau doit cliquer un lien reçu par e-mail avant de pouvoir se connecter ; désactivé = le compte marche tout de suite.
+   Dans **Authentication > Email Templates**, remplace le contenu de :
+   - **Confirm signup** par [supabase/templates/confirm-signup.html](supabase/templates/confirm-signup.html)
+   - **Reset Password** par [supabase/templates/reset-password.html](supabase/templates/reset-password.html)
 
-   ```html
-   <h2>Connexion à The Boyz</h2>
-   <p><a href="{{ .ConfirmationURL }}">Me connecter</a></p>
-   <p>Ou tape ce code sur le site : <strong>{{ .Token }}</strong></p>
-   ```
-
+   Ces modèles font marcher les liens même s'ils s'ouvrent dans un autre navigateur que le site (appli mail du téléphone).
 5. Dans **Project Settings > API Keys**, copie l'URL du projet et la clé *publishable*.
 
 > L'e-mail intégré de Supabase est limité à quelques envois par heure. Pour un groupe de potes ça passe ; sinon, branche un SMTP (Resend, Brevo…) dans **Authentication > SMTP Settings**.

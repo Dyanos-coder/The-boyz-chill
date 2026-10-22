@@ -49,33 +49,37 @@ export default async function HomePage() {
           {featured.length > 0 && (
             <section style={{ display: "grid", gap: 14 }}>
               <span className="section-label">{today.length ? "Aujourd'hui" : "Prochain plan"}</span>
-              {featured.map((p) => (
-                <PlanTicket key={p.id} plan={p} userId={userId} />
-              ))}
-            </section>
-          )}
-
-          {later.length > 0 && (
-            <section style={{ display: "grid", gap: 10 }}>
-              <span className="section-label">Plus tard</span>
-              <div className="plan-list">
-                {later.map((p) => (
-                  <PlanRow key={p.id} plan={p} />
+              <div className="ticket-grid">
+                {featured.map((p) => (
+                  <PlanTicket key={p.id} plan={p} userId={userId} />
                 ))}
               </div>
             </section>
           )}
 
-          {ideas.length > 0 && (
-            <section style={{ display: "grid", gap: 10 }}>
-              <span className="section-label">Idées sans date</span>
-              <div className="plan-list">
-                {ideas.map((p) => (
-                  <PlanRow key={p.id} plan={p} />
-                ))}
-              </div>
-            </section>
-          )}
+          <div className="home-lists">
+            {later.length > 0 && (
+              <section style={{ display: "grid", gap: 10 }}>
+                <span className="section-label">Plus tard</span>
+                <div className="plan-list">
+                  {later.map((p) => (
+                    <PlanRow key={p.id} plan={p} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {ideas.length > 0 && (
+              <section style={{ display: "grid", gap: 10 }}>
+                <span className="section-label">Idées sans date</span>
+                <div className="plan-list">
+                  {ideas.map((p) => (
+                    <PlanRow key={p.id} plan={p} />
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
         </>
       )}
     </>

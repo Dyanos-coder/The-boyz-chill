@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireUser } from "@/lib/data";
 import { VIBES } from "@/lib/types";
 import { safeNext } from "@/lib/safe-next";
+import { SUPABASE_URL } from "@/lib/supabase/config";
 
 export type ProfileState = { error?: string; saved?: boolean; pseudo?: string; color?: string };
 
@@ -25,7 +26,16 @@ export async function saveProfile(_prev: ProfileState, formData: FormData): Prom
   if (!parsed.success) return { ...raw, error: parsed.error.issues[0].message };
 
   const { supabase, userId } = await requireUser();
-  const { error } = await supabase.from("profiles").update(parsed.data).eq("id", userId);
+
+  // La photo est envoyée par le navigateur dans le dossier de l'utilisateur ; on refuse toute autre adresse.
+  const avatarUrl = String(formData.get("avatar_url") ?? "");
+  const avatarPrefix = `${SUPABASE_URL}/storage/v1/object/public/avatars/${userId}/`;
+  if (avatarUrl && !avatarUrl.startsWith(avatarPrefix)) return { ...raw, error: "La photo n'a pas été envoyée correctement, remets-la." };
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ ...parsed.data, avatar_url: avatarUrl || null })
+    .eq("id", userId);
   if (error) {
     return {
       ...raw,

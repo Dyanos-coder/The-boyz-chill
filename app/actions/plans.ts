@@ -18,6 +18,8 @@ export type PlanFormValues = {
   place_address: string;
   description: string;
   max_people: string;
+  link_url: string;
+  cover_path: string;
 };
 
 export type PlanFormState = { error?: string; values?: PlanFormValues };
@@ -41,6 +43,11 @@ const planSchema = z
     place_address: optionalText(160, "l'adresse"),
     description: optionalText(2000, "les infos"),
     max_people: z.string().regex(/^\d*$/, { error: "Le nombre de places doit être un nombre." }),
+    link_url: z.union([
+      z.literal(""),
+      z.url({ protocol: /^https?$/, error: "Ce lien n'a pas l'air valide. Colle l'adresse complète de la page." }).max(500),
+    ]),
+    cover_path: z.string(),
   })
   .refine((v) => v.when === "later" || /^\d{4}-\d{2}-\d{2}$/.test(v.date), {
     error: "Mets une date, ou choisis « Date à décider ».",
@@ -50,6 +57,13 @@ const planSchema = z
   });
 
 const field = (fd: FormData, key: string) => String(fd.get(key) ?? "");
+
+/** « billetterie.fr/concert » → « https://billetterie.fr/concert » */
+function normalizeUrl(raw: string) {
+  const s = raw.trim();
+  if (!s) return "";
+  return /^https?:\/\//i.test(s) ? s : `https://${s}`;
+}
 
 export async function savePlan(_prev: PlanFormState, formData: FormData): Promise<PlanFormState> {
   const values: PlanFormValues = {
@@ -63,11 +77,19 @@ export async function savePlan(_prev: PlanFormState, formData: FormData): Promis
     place_address: field(formData, "place_address"),
     description: field(formData, "description"),
     max_people: field(formData, "max_people"),
+    link_url: normalizeUrl(field(formData, "link_url")),
+    cover_path: field(formData, "cover_path"),
   };
 
   const parsed = planSchema.safeParse(values);
   if (!parsed.success) return { values, error: parsed.error.issues[0].message };
   const v = parsed.data;
+
+  const { supabase, userId, group } = await requireMember();
+
+  // L'image est envoyée par le navigateur dans le dossier du groupe ; on refuse tout autre chemin.
+  const coverOk = new RegExp(`^${group.id}/covers/[0-9a-f-]{36}\\.(webp|jpe?g|png)$`).test(v.cover_path);
+  if (v.cover_path && !coverOk) return { values, error: "L'image n'a pas été envoyée correctement, remets-la." };
 
   const startsAt = v.when === "date" ? parisToIso(v.date, v.time) : null;
   const row = {
@@ -78,9 +100,9 @@ export async function savePlan(_prev: PlanFormState, formData: FormData): Promis
     place_address: v.place_address || null,
     description: v.description || null,
     max_people: v.max_people ? Math.max(1, Number(v.max_people)) : null,
+    link_url: v.link_url || null,
+    cover_path: v.cover_path || null,
   };
-
-  const { supabase, userId, group } = await requireMember();
 
   if (v.id) {
     const { data: current } = await supabase.from("plans").select("status").eq("id", v.id).maybeSingle();

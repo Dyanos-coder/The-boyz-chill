@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { saveProfile, type ProfileState } from "@/app/actions/profile";
 import { VIBES, type Vibe } from "@/lib/types";
 import { SubmitButton } from "./small-client";
+import { AvatarPicker } from "./avatar-picker";
 
 const COLOR_NAMES: Record<Vibe, string> = {
   chill: "Lavande",
@@ -15,13 +16,17 @@ const COLOR_NAMES: Record<Vibe, string> = {
 };
 
 export function ProfileForm({
+  userId,
   pseudo,
   color,
+  avatarUrl,
   suite,
   submitLabel,
 }: {
+  userId: string;
   pseudo: string;
   color: Vibe;
+  avatarUrl: string | null;
   suite?: string;
   submitLabel: string;
 }) {
@@ -31,6 +36,7 @@ export function ProfileForm({
   return (
     <form action={action} style={{ display: "grid", gap: 20 }}>
       {suite && <input type="hidden" name="suite" value={suite} />}
+      <AvatarPicker userId={userId} initialUrl={avatarUrl} initial={(state.pseudo ?? pseudo).trim().charAt(0).toUpperCase()} />
       <div className="field">
         <label className="field__label" htmlFor="pseudo">
           Ton pseudo

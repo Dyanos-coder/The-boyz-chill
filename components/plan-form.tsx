@@ -4,14 +4,25 @@ import { useActionState, useState } from "react";
 import { savePlan, type PlanFormState, type PlanFormValues } from "@/app/actions/plans";
 import { VIBES, VIBE_LABELS } from "@/lib/types";
 import { SubmitButton } from "./small-client";
+import { ImagePicker } from "./image-picker";
 
-export function PlanForm({ initial, submitLabel }: { initial: PlanFormValues; submitLabel: string }) {
+export function PlanForm({
+  initial,
+  submitLabel,
+  groupId,
+  coverUrl = null,
+}: {
+  initial: PlanFormValues;
+  submitLabel: string;
+  groupId: string;
+  coverUrl?: string | null;
+}) {
   const [state, action] = useActionState<PlanFormState, FormData>(savePlan, { values: initial });
   const v = state.values ?? initial;
   const [when, setWhen] = useState(v.when);
 
   return (
-    <form action={action} className="card" style={{ gap: 22 }}>
+    <form action={action} className="card plan-form" style={{ gap: 22 }}>
       <input type="hidden" name="id" value={v.id} />
 
       <div className="field">
@@ -69,20 +80,42 @@ export function PlanForm({ initial, submitLabel }: { initial: PlanFormValues; su
         )}
       </fieldset>
 
-      <div className="field">
-        <label className="field__label" htmlFor="place_name">
-          Lieu
-        </label>
-        <input className="input" id="place_name" name="place_name" maxLength={80} placeholder="Bar, salle, chez quelqu'un…" defaultValue={v.place_name} />
-        <span className="field__hint">Laisse vide si c&apos;est encore à décider.</span>
+      <div className="form-row">
+        <div className="field">
+          <label className="field__label" htmlFor="place_name">
+            Lieu
+          </label>
+          <input className="input" id="place_name" name="place_name" maxLength={80} placeholder="Bar, salle, chez quelqu'un…" defaultValue={v.place_name} />
+          <span className="field__hint">Laisse vide si c&apos;est encore à décider.</span>
+        </div>
+
+        <div className="field">
+          <label className="field__label" htmlFor="place_address">
+            Adresse
+          </label>
+          <input className="input" id="place_address" name="place_address" maxLength={160} placeholder="Pour ouvrir l'itinéraire en un tap" defaultValue={v.place_address} />
+        </div>
       </div>
 
       <div className="field">
-        <label className="field__label" htmlFor="place_address">
-          Adresse
+        <label className="field__label" htmlFor="link_url">
+          Lien de l&apos;événement
         </label>
-        <input className="input" id="place_address" name="place_address" maxLength={160} placeholder="Pour ouvrir l'itinéraire en un tap" defaultValue={v.place_address} />
+        <input
+          className="input"
+          id="link_url"
+          name="link_url"
+          type="text"
+          inputMode="url"
+          autoComplete="url"
+          maxLength={500}
+          placeholder="https://… billetterie, page Facebook, site du lieu"
+          defaultValue={v.link_url}
+        />
+        <span className="field__hint">Pour un concert, un match, une expo : mets la page officielle.</span>
       </div>
+
+      <ImagePicker groupId={groupId} initialPath={v.cover_path} initialUrl={v.cover_path === initial.cover_path ? coverUrl : null} />
 
       <div className="field">
         <label className="field__label" htmlFor="description">

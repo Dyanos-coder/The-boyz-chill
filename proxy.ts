@@ -13,6 +13,15 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/configuration", request.url));
   }
 
+  // Si Supabase renvoie vers l'adresse du site plutôt que vers /auth/callback
+  // (URL de retour non autorisée), on fait suivre les paramètres de connexion.
+  const authParams = request.nextUrl.searchParams;
+  if (pathname !== "/auth/callback" && (authParams.has("token_hash") || authParams.has("code"))) {
+    const url = new URL("/auth/callback", request.url);
+    url.search = search;
+    return NextResponse.redirect(url);
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_KEY, {

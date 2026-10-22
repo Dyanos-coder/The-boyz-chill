@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, Clock, MapPin } from "lucide-react";
+import { ChevronRight, Clock, ExternalLink, MapPin } from "lucide-react";
 import { formatShort, formatTime, isToday, stubParts } from "@/lib/format";
 import type { Plan, RsvpStatus } from "@/lib/types";
 import { AvatarStack, PlanStatusTag, VibeBadge } from "./ui";
@@ -19,7 +19,17 @@ function peopleSummary(plan: Plan) {
 }
 
 /** Le ticket : la carte principale d'un plan. */
-export function PlanTicket({ plan, userId, linked = true }: { plan: Plan; userId: string; linked?: boolean }) {
+export function PlanTicket({
+  plan,
+  userId,
+  linked = true,
+  showCover = true,
+}: {
+  plan: Plan;
+  userId: string;
+  linked?: boolean;
+  showCover?: boolean;
+}) {
   const today = plan.starts_at ? isToday(plan.starts_at) : false;
   const stub = plan.starts_at ? stubParts(plan.starts_at) : null;
   const mine = plan.rsvps.find((r) => r.user_id === userId)?.status ?? null;
@@ -45,6 +55,10 @@ export function PlanTicket({ plan, userId, linked = true }: { plan: Plan; userId
           )}
         </div>
         <div className="ticket__body">
+          {showCover && plan.cover_url && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="ticket__cover" src={plan.cover_url} alt="" loading="lazy" />
+          )}
           <div className="ticket__top">
             <VibeBadge vibe={plan.vibe} />
             <PlanStatusTag status={plan.status} label={plan.status === "idee" ? "Date à décider" : undefined} />
@@ -58,7 +72,7 @@ export function PlanTicket({ plan, userId, linked = true }: { plan: Plan; userId
               plan.title
             )}
           </h3>
-          {(plan.starts_at || plan.place_name) && (
+          {(plan.starts_at || plan.place_name || plan.link_url) && (
             <p className="ticket__meta">
               {plan.starts_at && (
                 <span>
@@ -70,6 +84,12 @@ export function PlanTicket({ plan, userId, linked = true }: { plan: Plan; userId
                 <span>
                   <MapPin size={14} aria-hidden="true" />
                   {plan.place_name}
+                </span>
+              )}
+              {plan.link_url && (
+                <span>
+                  <ExternalLink size={14} aria-hidden="true" />
+                  Événement
                 </span>
               )}
             </p>

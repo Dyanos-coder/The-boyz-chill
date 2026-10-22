@@ -16,7 +16,7 @@ export default async function GroupePage() {
   const inviteUrl = `${proto}://${host}/rejoindre/${group.invite_code}`;
 
   return (
-    <>
+    <div className="narrow">
       <h1 className="page-title">{group.name}</h1>
 
       <section className="card">
@@ -43,6 +43,6 @@ export default async function GroupePage() {
           ))}
         </ul>
       </section>
-    </>
+    </div>
   );
 }
