@@ -31,6 +31,10 @@ const passwordSchema = z
   .min(8, { error: "Le mot de passe doit faire au moins 8 caractères." })
   .max(72, { error: "72 caractères maximum pour le mot de passe." });
 
+// Supabase limite l'envoi d'e-mails de son service intégré (quelques-uns par heure pour tout le projet).
+const EMAIL_LIMIT_MESSAGE =
+  "Le site a atteint sa limite d'e-mails pour l'heure. Réessaie dans une heure, ou demande à l'admin du site de régler l'envoi d'e-mails.";
+
 const readEmail = (fd: FormData) => String(fd.get("email") ?? "").trim().toLowerCase();
 
 export async function signIn(_prev: AuthState, formData: FormData): Promise<AuthState> {
@@ -79,9 +83,11 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
         ? "Un compte existe déjà avec cet e-mail. Connecte-toi."
         : error.code === "weak_password"
           ? "Mot de passe trop simple. Mélange lettres et chiffres."
-          : error.status === 429
-            ? "Trop d'inscriptions d'affilée. Attends une minute."
-            : "L'inscription n'est pas passée, réessaie.";
+          : error.code === "over_email_send_rate_limit"
+            ? EMAIL_LIMIT_MESSAGE
+            : error.status === 429
+              ? "Trop d'inscriptions d'affilée. Attends quelques minutes."
+              : "L'inscription n'est pas passée, réessaie.";
     return { mode: error.code === "user_already_exists" ? "connexion" : "inscription", email, suite, error: message };
   }
 
@@ -111,7 +117,11 @@ export async function requestPasswordReset(_prev: AuthState, formData: FormData)
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${await getOrigin()}/auth/callback`,
   });
-  if (error?.status === 429) return { mode: "oubli", email, error: "Trop de demandes d'affilée. Attends une minute." };
+  if (error?.status === 429) {
+    const message =
+      error.code === "over_email_send_rate_limit" ? EMAIL_LIMIT_MESSAGE : "Trop de demandes d'affilée. Attends quelques minutes.";
+    return { mode: "oubli", email, error: message };
+  }
 
   // Même réponse que l'adresse existe ou non.
   return {

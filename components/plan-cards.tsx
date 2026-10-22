@@ -65,7 +65,7 @@ export function PlanTicket({
           </div>
           <h3 className="ticket__title">
             {linked ? (
-              <Link href={`/plans/${plan.id}`} className="link-plain">
+              <Link href={`/plans/${plan.id}`} className="link-plain ticket__link">
                 {plan.title}
               </Link>
             ) : (

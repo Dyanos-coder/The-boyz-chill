@@ -71,6 +71,37 @@ export function parisToIso(date: string, time: string) {
   return new Date(exact).toISOString();
 }
 
+export type CalendarDay = { key: string; day: number; inMonth: boolean };
+
+/** Grille d'un mois (« 2026-10 »), semaines du lundi au dimanche, jours des mois voisins compris. */
+export function monthGrid(month: string): CalendarDay[] {
+  const [y, m] = month.split("-").map(Number);
+  const first = Date.UTC(y, m - 1, 1);
+  const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const lead = (new Date(first).getUTCDay() + 6) % 7; // lundi = 0
+  const total = Math.ceil((lead + daysInMonth) / 7) * 7;
+  return Array.from({ length: total }, (_, i) => {
+    const d = new Date(first + (i - lead) * 86400000);
+    return { key: d.toISOString().slice(0, 10), day: d.getUTCDate(), inMonth: d.getUTCMonth() === m - 1 };
+  });
+}
+
+/** « 2026-10 » décalé de n mois. */
+export function shiftMonth(month: string, n: number) {
+  const [y, m] = month.split("-").map(Number);
+  const d = new Date(Date.UTC(y, m - 1 + n, 1));
+  return d.toISOString().slice(0, 7);
+}
+
+/** « 2026-10-24 » → jour suivant. */
+export const nextDayKey = (key: string) => new Date(Date.parse(`${key}T00:00:00Z`) + 86400000).toISOString().slice(0, 10);
+
+/** « 2026-10-24 » → « samedi 24 octobre » (sans décalage de fuseau). */
+export const formatDayKey = (key: string) =>
+  new Intl.DateTimeFormat("fr-FR", { timeZone: "UTC", weekday: "long", day: "numeric", month: "long" }).format(
+    new Date(`${key}T12:00:00Z`),
+  );
+
 /** ISO UTC → { date: « 2026-10-24 », time: « 20:30 » } à Paris, pour pré-remplir un formulaire. */
 export function isoToParis(iso: string) {
   const d = new Date(iso);

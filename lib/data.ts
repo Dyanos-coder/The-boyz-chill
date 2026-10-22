@@ -103,6 +103,38 @@ export async function getPastPlans(groupId: string, limit = 30): Promise<Plan[]>
   return withCovers(supabase, data);
 }
 
+/** Plans datés entre deux instants (pour le calendrier), annulés compris. */
+export async function getPlansBetween(groupId: string, fromIso: string, toIso: string): Promise<Plan[]> {
+  const { supabase } = await requireUser();
+  const { data, error } = await supabase
+    .from("plans")
+    .select(PLAN_SELECT)
+    .eq("group_id", groupId)
+    .gte("starts_at", fromIso)
+    .lt("starts_at", toIso)
+    .order("starts_at");
+  if (error) throw error;
+  return withCovers(supabase, data);
+}
+
+/** Recherche dans le nom, le lieu, l'adresse et les infos des plans du groupe. */
+export async function searchPlans(groupId: string, query: string): Promise<Plan[]> {
+  // On ne garde que lettres, chiffres, espaces, apostrophes et tirets : rien qui casse le filtre PostgREST.
+  const q = query.replace(/[^\p{L}\p{N}\s'-]/gu, " ").replace(/\s+/g, " ").trim();
+  if (!q) return [];
+  const { supabase } = await requireUser();
+  const like = `"%${q}%"`;
+  const { data, error } = await supabase
+    .from("plans")
+    .select(PLAN_SELECT)
+    .eq("group_id", groupId)
+    .or(`title.ilike.${like},place_name.ilike.${like},place_address.ilike.${like},description.ilike.${like}`)
+    .order("starts_at", { ascending: false, nullsFirst: true })
+    .limit(50);
+  if (error) throw error;
+  return withCovers(supabase, data);
+}
+
 export async function getPlan(id: string): Promise<Plan | null> {
   const { supabase } = await requireUser();
   const { data, error } = await supabase.from("plans").select(PLAN_SELECT).eq("id", id).maybeSingle();
